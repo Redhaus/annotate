@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 
 import rangy from 'rangy/lib/rangy-core';
+import 'rangy/lib/rangy-serializer';
 // import highlighter from '../../node_modules/rangy/lib/rangy-highlighter';
+import 'rangy/lib/rangy-selectionsaverestore';
 import 'rangy/lib/rangy-classapplier';
 import 'rangy/lib/rangy-textrange';
 // import MediumButton from 'medium-button';
@@ -13,10 +15,11 @@ import MediumEditor from 'medium-editor';
 
 // next steps:
 // make comment log based on clicking on item  DONE
+// rangy save selction restore selction shuold work but need to store selection remotely to try and load it
 // prevent additional additions to state on click. 
 // ability to cancel highlight and link 
 // ensure link locations and data and ids can load on selection import
-
+// figure out saveselection and restoreSelection
 
 class Poem extends Component {
 
@@ -26,13 +29,13 @@ class Poem extends Component {
         this.openNav = this.openNav.bind(this);
         this.closeNav = this.closeNav.bind(this);
         this.saveAnnotation = this.saveAnnotation.bind(this);
+        this.restoreAnn = this.restoreAnn.bind(this)
         this.high = this.high.bind(this);
         
         
         const selectionData = [];
 
         let data = {test:'a'}
-        
     }
 
     
@@ -49,22 +52,37 @@ class Poem extends Component {
 
         // dummy data selections
 
-        const selects = [
-            {start: 447, end: 460}, 
-            {start: 747, end: 760}
-        ]
+        // const selects =    {start: 447, end: 460};
 
         rangy.init();
+        // rangy.restoreSelectionFromCookie()
 
+        // var local = JSON.parse(localStorage.getItem('myData'));
+        // console.log(local)
+        // rangy.deserializeSelection(local);
+        
+
+        // var data = localStorage.getItem('myData')
         // const idx = this.state.id;
         // console.log(idx)
 
-        console.log(selects.length);
-        // if(selects.length)
+        // console.log(selects.length);
+
+
+
+
+            // selects.map((item) => {
+            //     this.base.importSelection(item)
+            //     this.classApplier.toggleSelection();
+            // })
+
 
 
         this.high();
 
+          // how to import multiple selects
+         
+        
 
     } 
 
@@ -88,6 +106,9 @@ class Poem extends Component {
 
 
         high() {
+
+           
+
         var HighlighterButton = MediumEditor.extensions.button.extend({
             name: 'highlighter',
 
@@ -126,21 +147,19 @@ class Poem extends Component {
                     // this adds unique ID to selection with callback function
                     onElementCreate: function(el) {
                         el.id = "rangySpan_" + (id++);
-                        console.log(el.id)
+                        // console.log(el.id)
                         updateID(el.id)
                         },
                     normalize: true
                 });
 
-                // how to import multiple selects
-                // selects.map((item) => {
-                //     this.base.importSelection(item)
-                //     this.classApplier.toggleSelection();
-                // })
+              
 
             },
 
             handleClick: function (event) {
+                // this.base.importSelection({start: 447, end: 460})
+                
                 this.classApplier.toggleSelection();
                 this.base.checkContentChanged();
 
@@ -157,6 +176,20 @@ class Poem extends Component {
                 // text of URL
                 var url = native.baseNode.baseURI
 
+                
+                // this.base.saveSelection();
+
+                // console.log(this.base)
+
+                // var asd = this.base.saveSelection();
+                // console.log(this.base.saveSelection().bind(this))
+
+                
+                // var save = this.base.saveSelection();
+
+
+                // console.log(save)
+
                 // var id = idx
                 // console.log(id)
 
@@ -167,7 +200,12 @@ class Poem extends Component {
             }
         });
 
+    
+
         var editor = new MediumEditor('#content', {
+            
+        
+            
             toolbar: {
                 // buttons: ['bold', 'italic', 'underline', 'highlighter', 'autolink']
                 buttons: ['highlighter']
@@ -182,6 +220,23 @@ class Poem extends Component {
         const handleOpen = (range, quote, url, id) => {
             // console.log(range, quote, url)
             this.openNav(range, quote, url, id)
+            // editor.importSelection({start: 447, end: 460})
+            // toggleSelection();
+            
+
+// console.log(
+
+
+            // editor.subscribe('editableDrop', function () {
+            //     var test = editor.saveSelection();
+            //     console.log('test: ' , test)
+            // })
+
+            // medium.subscribe('editableInput', medium.saveSelection.bind(medium))
+            // editor.subscribe
+            // var save = editor.saveSelection().bind(editor);
+            // console.log(save)
+            // console.log(editor)
 
            
         }
@@ -204,7 +259,7 @@ class Poem extends Component {
                     id: idx
                 }
             }, function (){
-                console.log('id: ', this.state)
+                // console.log('id: ', this.state)
             })
 
            
@@ -222,6 +277,7 @@ class Poem extends Component {
 
     // Toggles nav
     toggleNav() {
+        // editor.restoreSelection();
 
         // if(open)
         if (document.getElementById("mySidenav").style.width === "250px") {
@@ -266,10 +322,38 @@ class Poem extends Component {
         document.getElementById("content").style.marginLeft = "200px";
     }
 
+    restoreAnn(sel){
+        rangy.restoreSelection(sel);
+        
+    }
+
 
     // gets text from input and adds it to the currect selection state obj
     saveAnnotation() {
         const textarea = document.getElementById("text");
+        var savedSel = rangy.saveSelection(document.getElementById("content"));
+        console.log('saved selection: ', savedSel)
+
+        // var selObj = rangy.getSelection();
+        // var sel = rangy.serializeSelection(savedSel, true);
+
+        // rangy.saveSelectionCookie();
+
+        // var ser = rangy.serializeSelection(savedSel, true)
+        // console.log('ser: ', ser)
+        
+
+        // restoreAnn(savedSel);
+
+        // localStorage.setItem('myData', JSON.stringify(savedSel));
+
+        // var local = JSON.parse(localStorage.getItem('myData'));
+        // console.log('local: ', local)
+
+// console.log('local: ', localStorage.getItem('myData'))
+
+// getter
+// localStorage.getItem('myData');
 
         // get the last item in the selections array and add comment
         const newState = this.state.selections.pop()
@@ -293,7 +377,7 @@ class Poem extends Component {
         textarea.value = ''
 
         
-
+        
         // console.log(data)
        
         //   // // location of selection
@@ -333,6 +417,8 @@ class Poem extends Component {
             <div>
 
                 <button onClick={this.toggleNav}>Toggle</button>
+                <button onClick={this.restoreAnn}>restore</button>
+                
 
 
 
